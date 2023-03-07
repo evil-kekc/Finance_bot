@@ -3,10 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import InlineKeyboardButton
 
-from bot_config import BASE_DIR
-from databases.db import Database
-
-DATABASE = Database(fr'{BASE_DIR}/databases/bot.db', fr'{BASE_DIR}/databases/create_db.sql')
+from handlers.expenses.expense import DATABASE
 
 
 async def cmd_start(message: types.Message, state: FSMContext):

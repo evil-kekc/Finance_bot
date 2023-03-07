@@ -1,10 +1,9 @@
 import logging
 import sqlite3 as sq
-from collections import namedtuple
-from sqlite3 import OperationalError
-from typing import NamedTuple
+from sqlite3 import OperationalError, IntegrityError
+from typing import NamedTuple, Optional
 
-from app.bot_config import BASE_DIR
+from config.bot_config import BASE_DIR
 
 LOGGER = 'databases.log'
 logging.basicConfig(filename=f'{str(BASE_DIR)}\\{LOGGER}',
@@ -21,6 +20,7 @@ class Category(NamedTuple):
 class Database:
     def __init__(self, db_file: str, sql_script_file: str):
         self.connection = sq.connect(db_file)
+        self.connection.execute("PRAGMA foreign_keys = ON")
         self.cursor = self.connection.cursor()
         self.sql_script = sql_script_file
         self._create_db()
@@ -54,3 +54,56 @@ class Database:
                     yield result
         except Exception as ex:
             logging.error(repr(ex))
+
+    def add_expense(self, user_id: int, amount: float, category_codename: str) -> None:
+        """Adding an expense
+
+        :param user_id: user id
+        :param amount: expense amount
+        :param category_codename: expense category code
+        :return: None
+        """
+        try:
+            with self.connection:
+                self.cursor.execute(
+                    "INSERT INTO expense (id, amount, created, category_codename) "
+                    "VALUES (?, ?, datetime('now', 'localtime'), ?)",
+                    (user_id, amount, category_codename))
+        except IntegrityError as ex:
+            logging.error(repr(ex))
+
+        except Exception as ex:
+            logging.error(repr(ex))
+
+    def _check_user(self, user_id: int) -> bool or None:
+        """Checking if a user exists
+
+        :param user_id: user_id
+        :return: True/None
+        """
+        with self.connection:
+            users = self.cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,)).fetchall()
+            if not users:
+                return True
+            else:
+                return
+
+    def add_user(self, user_id: int, is_admin: bool) -> None:
+        """Adding a user to the database
+
+        :param is_admin: bool
+        :param user_id: user id
+        :return: None
+        """
+        try:
+            with self.connection:
+                if self._check_user(user_id=user_id):
+                    self.cursor.execute(
+                        "INSERT INTO users (id, is_admin, is_active, last_active) "
+                        "VALUES (?, ?, ?, datetime('now', 'localtime'))",
+                        (user_id, True, is_admin))
+                    logging.info(f'Add new user {user_id}')
+        except IntegrityError:
+            logging.info(f'Data not saved, such user [{user_id}] already exists')
+
+

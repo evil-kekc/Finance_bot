@@ -2,9 +2,9 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from bot_config import bot
-from handlers.expenses.expense import call_back_confirm, ChoiceExpense, create_confirm_expenses_kb, quantity_is_valid, \
-    ALL_CATEGORIES
+from config.bot_config import bot
+from handlers.expenses.expense import CALLBACK_CONFIRM, ChoiceExpense, create_confirm_expenses_kb, quantity_is_valid, \
+    ALL_CATEGORIES, add_expense
 
 
 class Expenses(StatesGroup):
@@ -53,35 +53,35 @@ async def expense_start(callback_query: types.CallbackQuery, state: FSMContext):
 
     elif expense.state == 'cafe_add':
         await send_expenses_message('кафе')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.cafe_add.state)
 
     elif expense.state == 'transport_add':
         await send_expenses_message('транспорт')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.transport_add.state)
 
     elif expense.state == 'taxi_add':
         await send_expenses_message('такси')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.taxi_add.state)
 
     elif expense.state == 'phone_add':
         await send_expenses_message('телефон')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.phone_add.state)
 
     elif expense.state == 'books_add':
         await send_expenses_message('книги')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.books_add.state)
 
     elif expense.state == 'internet_add':
         await send_expenses_message('интернет')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.internet_add.state)
 
     elif expense.state == 'subscriptions_add':
         await send_expenses_message('подписки')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.subscriptions_add.state)
 
     elif expense.state == 'other_add':
         await send_expenses_message('прочие нужды')
-        await state.set_state(Expenses.products_add.state)
+        await state.set_state(Expenses.other_add.state)
 
     elif callback_query.data == 'NOT_FOUND':
         await callback_query.answer('Эта функция пока не доступна', show_alert=True)
@@ -101,58 +101,60 @@ async def send_expense(message: types.Message, state: FSMContext):
 
     current_state = await state.get_state()
 
+    user_id = int(message.from_user.id)
+
     if current_state == 'Expenses:products_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='products')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='products', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию продукты?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:coffee_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='coffee')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='coffee', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию кофе?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:dinner_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='dinner')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='dinner', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию обед?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:cafe_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='cafe')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='cafe', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию кафе?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:transport_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='transport')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='transport', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию общественный транспорт?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:taxi_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='taxi')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='taxi', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию такси?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:phone_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='phone')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='phone', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию телефон?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:books_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='books')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='books', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию книги?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:internet_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='internet')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='internet', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию интернет?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:subscriptions_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='subscriptions')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='subscriptions', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию подписки?', reply_markup=keyboard)
         await state.finish()
 
     elif current_state == 'Expenses:other_add':
-        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='other')
+        keyboard = create_confirm_expenses_kb(quantity=quantity, codename='other', user_id=user_id)
         await message.answer(f'Добавляем {message.text}р в категорию остальные расходы?', reply_markup=keyboard)
         await state.finish()
 
@@ -165,10 +167,18 @@ async def confirm_expense(callback_query: types.CallbackQuery, callback_data: di
     :return:
     """
     if callback_data['answer'] == 'Yes':
-        codename = callback_data['codename']
-        quantity = callback_data['quantity']
-        await callback_query.answer(f'Расход {quantity}р успешно добавлен в {codename}!', show_alert=True)
-        await callback_query.message.delete()
+        user_id = callback_data['user_id']
+        category_codename = callback_data['codename']
+        amount = callback_data['quantity']
+
+        if add_expense(user_id=user_id, amount=amount, category_codename=category_codename):
+            await callback_query.answer(f'Расход {amount}р успешно добавлен в {category_codename}!', show_alert=True)
+            await callback_query.message.delete()
+        else:
+            await callback_query.answer(f'Произошла ошибка! Проверьте введенные данные и повторите попытку',
+                                        show_alert=True)
+            await callback_query.message.delete()
+
     else:
         await callback_query.answer(f'Добавление отменено')
         await callback_query.message.delete()
@@ -180,7 +190,7 @@ def register_handlers_add_expenses(dp: Dispatcher):
     :param dp: Dispatcher object
     :return:
     """
-    dp.register_callback_query_handler(confirm_expense, call_back_confirm.filter())
+    dp.register_callback_query_handler(confirm_expense, CALLBACK_CONFIRM.filter())
     dp.register_callback_query_handler(expense_start,
                                        lambda c: c.data == c.data if c.data in ALL_CATEGORIES else 'NOT_FOUND',
                                        state='*')

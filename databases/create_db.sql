@@ -1,10 +1,10 @@
 CREATE TABLE users (
-    id          VARCHAR (255) PRIMARY KEY,
-    is_admin    BOOLEAN       NOT NULL
-                              DEFAULT FALSE,
-    is_active   BOOLEAN       NOT NULL
-                              DEFAULT FALSE,
-    last_active DATETIME      DEFAULT (datetime('now', 'localtime') ) 
+    id          INTEGER  PRIMARY KEY,
+    is_admin    BOOLEAN  NOT NULL
+                         DEFAULT FALSE,
+    is_active   BOOLEAN  NOT NULL
+                         DEFAULT FALSE,
+    last_active DATETIME DEFAULT (datetime('now', 'localtime') )
 );
 
 
@@ -17,11 +17,11 @@ CREATE TABLE expense (
     id INTEGER,
     amount            REAL,
     created           DATETIME,
-    category_codename INTEGER,
+    category_codename VARCHAR (255),
     FOREIGN KEY (
         category_codename
     )
-    REFERENCES category (codename),
+    REFERENCES categories (codename),
     FOREIGN KEY (
         id
     )

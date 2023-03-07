@@ -5,15 +5,16 @@ from aiogram import Bot
 from aiogram.types import BotCommand
 
 from app.handlers import add_expenses, common_handlers
-from bot_config import bot, dp, BASE_DIR
+from config.bot_config import bot, dp, BASE_DIR, ADMIN_ID
+from config.middlewares import AccessMiddleware
 
 LOGGER = 'bot.log'
 
 
 async def set_commands(bot: Bot):
-    """Создание меню бота
+    """Creating a bot menu
 
-    :param bot: экземпляр класса bot
+    :param bot: an instance of the bot class
     :return:
     """
     commands = [
@@ -27,12 +28,13 @@ async def set_commands(bot: Bot):
 async def main():
     """Bot launch
 
-    :return:
+    :return: None
     """
     logging.basicConfig(filename=f'{str(BASE_DIR)}\\{LOGGER}',
                         format='%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
     logging.info('Starting bot')
+    dp.middleware.setup(AccessMiddleware(ADMIN_ID))
 
     common_handlers(dp)
     add_expenses(dp)
