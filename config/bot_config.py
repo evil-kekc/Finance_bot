@@ -7,6 +7,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config_reader import load_config
 
 BASE_DIR = Path(os.path.abspath(__file__)).parent.parent
+LOGGER = 'bot.log'
 
 config = load_config(f'{BASE_DIR}\\config\\bot_config.ini')
 ADMIN_ID = config.tg_bot.admin_id

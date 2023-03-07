@@ -1,11 +1,10 @@
 import logging
 import sqlite3 as sq
 from sqlite3 import OperationalError, IntegrityError
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
-from config.bot_config import BASE_DIR
+from config.bot_config import BASE_DIR, LOGGER
 
-LOGGER = 'databases.log'
 logging.basicConfig(filename=f'{str(BASE_DIR)}\\{LOGGER}',
                     format='%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
@@ -48,7 +47,8 @@ class Database:
         try:
 
             with self.connection:
-                result = self.cursor.execute("SELECT name, codename FROM categories")
+                result = self.cursor.execute("SELECT name, codename"
+                                             "FROM categories")
                 for category in result:
                     result = Category(name=category[0].title(), codename=category[1])
                     yield result
@@ -66,7 +66,7 @@ class Database:
         try:
             with self.connection:
                 self.cursor.execute(
-                    "INSERT INTO expense (id, amount, created, category_codename) "
+                    "INSERT INTO expense (id, amount, created, category_codename)"
                     "VALUES (?, ?, datetime('now', 'localtime'), ?)",
                     (user_id, amount, category_codename))
         except IntegrityError as ex:
@@ -82,7 +82,9 @@ class Database:
         :return: True/None
         """
         with self.connection:
-            users = self.cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,)).fetchall()
+            users = self.cursor.execute('SELECT id '
+                                        'FROM users '
+                                        'WHERE id = ?', (user_id,)).fetchall()
             if not users:
                 return True
             else:
@@ -99,11 +101,25 @@ class Database:
             with self.connection:
                 if self._check_user(user_id=user_id):
                     self.cursor.execute(
-                        "INSERT INTO users (id, is_admin, is_active, last_active) "
+                        "INSERT INTO users (id, is_admin, is_active, last_active)"
                         "VALUES (?, ?, ?, datetime('now', 'localtime'))",
                         (user_id, True, is_admin))
                     logging.info(f'Add new user {user_id}')
         except IntegrityError:
             logging.info(f'Data not saved, such user [{user_id}] already exists')
 
+    def update_last_active(self, user_id: int) -> None:
+        """Update last user activity
 
+        :param user_id: user id
+        :return: None
+        """
+        try:
+            with self.connection:
+                if not self._check_user(user_id=user_id):
+                    self.cursor.execute("UPDATE users "
+                                        "SET last_active = datetime('now', 'localtime')"
+                                        "WHERE id = ?",
+                                        (user_id,))
+        except Exception as ex:
+            logging.error(repr(ex))

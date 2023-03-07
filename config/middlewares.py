@@ -7,6 +7,7 @@ from handlers.common import DATABASE
 
 class AccessMiddleware(BaseMiddleware):
     """Authentication - skip messages from only one Telegram account"""
+
     def __init__(self, access_id: int):
         self.access_id = access_id
         super().__init__()
@@ -17,3 +18,12 @@ class AccessMiddleware(BaseMiddleware):
             raise CancelHandler()
         else:
             DATABASE.add_user(user_id=self.access_id, is_admin=True)
+
+
+class UpdateLastActiveMiddleware(BaseMiddleware):
+    """Update last user activity"""
+    def __init__(self):
+        super().__init__()
+
+    async def on_process_message(self, message: types.Message, _):
+        DATABASE.update_last_active(user_id=message.from_user.id)

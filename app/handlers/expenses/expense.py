@@ -4,7 +4,7 @@ from typing import NamedTuple
 from aiogram import types
 from aiogram.utils.callback_data import CallbackData
 
-from config.bot_config import BASE_DIR
+from config.bot_config import BASE_DIR, LOGGER
 from databases.db import Database
 
 DATABASE = Database(fr'{BASE_DIR}/databases/bot.db', fr'{BASE_DIR}/databases/create_db.sql')
@@ -13,7 +13,6 @@ ALL_CATEGORIES = [_.codename for _ in DATABASE.get_categories()]
 
 CALLBACK_CONFIRM = CallbackData('confirmation_expense', 'answer', 'quantity', 'codename', 'user_id')
 
-LOGGER = 'expenses.log'
 logging.basicConfig(filename=f'{str(BASE_DIR)}\\{LOGGER}',
                     format='%(asctime)s - %(threadName)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
