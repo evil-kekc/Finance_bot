@@ -45,9 +45,8 @@ class Database:
         :return: category generator object
         """
         try:
-
             with self.connection:
-                result = self.cursor.execute("SELECT name, codename"
+                result = self.cursor.execute("SELECT name, codename "
                                              "FROM categories")
                 for category in result:
                     result = Category(name=category[0].title(), codename=category[1])
