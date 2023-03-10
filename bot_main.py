@@ -4,7 +4,7 @@ import logging
 from aiogram import Bot
 from aiogram.types import BotCommand
 
-from app.handlers import add_expenses, common_handlers
+from app.handlers import add_expenses, common_handlers, get_expenses
 from config.bot_config import bot, dp, BASE_DIR, ADMIN_ID, LOGGER
 from config.middlewares import AccessMiddleware, UpdateLastActiveMiddleware
 
@@ -17,7 +17,12 @@ async def set_commands(bot: Bot):
     """
     commands = [
         BotCommand(command='/start', description='Начало работы'),
-        BotCommand(command='/categories', description='Список категорий'),
+        BotCommand(command='/add_expense', description='Список категорий'),
+        BotCommand(command='/cancel', description='Отмена действий'),
+        BotCommand(command='/get_all_expenses', description='Сумма всех расходов'),
+        BotCommand(command='/get_month_expenses', description='Расходы за месяц'),
+        BotCommand(command='/get_week_expenses', description='Расходы за неделю'),
+        BotCommand(command='/get_day_expenses', description='Расходы за день'),
     ]
 
     await bot.set_my_commands(commands)
@@ -36,6 +41,7 @@ async def main():
     dp.middleware.setup(UpdateLastActiveMiddleware())
 
     common_handlers(dp)
+    get_expenses(dp)
     add_expenses(dp)
 
     await set_commands(bot)

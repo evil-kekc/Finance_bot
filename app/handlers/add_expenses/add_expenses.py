@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot
-from handlers.expenses.expense import CALLBACK_CONFIRM, ChoiceExpense, create_confirm_expenses_kb, quantity_is_valid, \
+from handlers.expense import CALLBACK_CONFIRM, ChoiceExpense, create_confirm_expenses_kb, quantity_is_valid, \
     ALL_CATEGORIES, add_expense
 
 
